@@ -1,0 +1,3 @@
+---
+nexus_exposed_port: "8081"
+nexus_persistent_storage_path: "/opt/container_data/nexus"

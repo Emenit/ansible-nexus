@@ -1,0 +1,2 @@
+[linux]
+server1 ansible_connection=ssh  ansible_user=myuser ansible_ssh_private_key_file=/home/user/.ssh/private.key

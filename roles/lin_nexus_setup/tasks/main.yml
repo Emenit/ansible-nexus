@@ -1,0 +1,49 @@
+---
+# Nexus needs a persistent directory to store configuration
+- name: Create Persistant Directory
+  file:
+    path: "{{ nexus_persistent_storage_path }}"
+    state: directory
+    owner: '200'
+
+# We need pip here because it's the preffered way to get docker SDK and requests package needed for docker_container module
+- name: Make sure we have pip installed
+  apt:
+    state: latest
+    name: python-pip
+
+# Install Docker SDK (it's not docker engine itself) and requests module needed for docker_container module 
+- name: Make sure we have Docker SDK and requests module
+  pip:
+    name:
+      - docker
+      - requests
+
+# Start Nexus container on Docker engine with persistant storage (volumes)
+- name: Start Docker Container
+  docker_container:
+    name: nexus
+    image: sonatype/nexus3
+    ports:
+      - "{{ nexus_exposed_port }}:8081"
+    volumes:
+      - "{{ nexus_persistent_storage_path }}:/nexus-data"
+  register: docker_started
+
+- name: Init Nexus website
+  get_url:
+    url: "http://{{ inventory_hostname }}:8081"
+    dest: /tmp/index.html
+  ignore_errors: true
+
+# When setting up Nexus first time it generates a password file in a perssistant directory which we need for further configuration
+- name: First time setup
+  block:
+    - name: Obtain nexus password
+      slurp:
+        src: "{{ nexus_persistent_storage_path }}/admin.password"
+      register: nxpass
+    - debug:
+        msg: "{{ nxpass['content'] | b64decode }}"
+  #when: docker_started.changed
+  ignore_errors: true
