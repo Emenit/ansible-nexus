@@ -6,11 +6,11 @@
     state: directory
     owner: '200'
 
-# We need pip here because it's the preffered way to get docker SDK and requests package needed for docker_container module
+# We need pip here because it's the prefered way to get docker SDK and requests package needed for docker_container module
 - name: Make sure we have pip installed
-  apt:
+  package:
     state: latest
-    name: python-pip
+    name: python3-pip
 
 # Install Docker SDK (it's not docker engine itself) and requests module needed for docker_container module 
 - name: Make sure we have Docker SDK and requests module
